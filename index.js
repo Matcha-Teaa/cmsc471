@@ -6,6 +6,10 @@ longitudes = [67.709953, 20.168331, 1.659626, 17.873887, -63.616672, 45.038189, 
 this function cleans the data... replaces each '-' and '' in dataset with 0
 This function also adds the lat and long columns of every country
 */
+
+let current_country = null;
+let myChart;
+
 const loadData = async() => {
     let df = await d3.csv('data.csv');
     df = df.slice(4, 178);
@@ -56,6 +60,10 @@ const makeMap = async() => {
         var marker = L.marker([row["lat"], row["long"]]).addTo(map);
         // on the click of the marker do ... 
         marker.on("click", () => {
+            if (myChart) {
+              myChart.destroy();
+            }
+            makeChart(row["indicator"])
             var popupContent = `Name: ${row["indicator"]}<br>Lat: ${row["lat"]}<br>Long: ${row["long"]}`;
             var popup = L.popup().setLatLng(marker.getLatLng()).setContent(popupContent);
             popup.openOn(map);
@@ -63,8 +71,40 @@ const makeMap = async() => {
     });    
 }
 
-
 makeMap()
+
+
+
+const makeChart = async(curr_country) => {
+  const dataa = await loadData()
+  const ctx = document.getElementById('myChart');
+  myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: dataa.map(row => row.indicator),
+      datasets: [{
+        label: '# of Votes',
+        data: dataa.map(row => row.population),
+        borderWidth: 1,
+        backgroundColor: dataa.map(row => row.indicator === curr_country ? 'orange' : 'blue')
+      }]
+    },
+    options: {
+      animation: {
+        duration: 9000, 
+        easing: 'easeInOutQuad'
+      },
+      scales: {
+        x: {
+        },
+        y: {
+          type: "logarithmic",
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
 
 
 

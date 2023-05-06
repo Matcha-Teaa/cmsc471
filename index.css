@@ -2,7 +2,34 @@ html {
     background-color: lightblue;
 }
 
+.title {
+    display: flex;
+    justify-content: center;
+    font-size: 1.6rem;
+    padding: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-family: sans-serif;
+    background: white;
+    border-radius: 12px;
+
+}
+
+.row1 {
+    display: flex;
+    gap: 12px;
+}
+
 #map {
     height: 450px;
-    width: 650px;
+    width: 1450px;
+    border-radius: 12px;
+
 } 
+
+#info {
+    background-color: white;
+    border-radius: 12px;
+    padding: 12px;
+}
+
