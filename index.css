@@ -1,5 +1,21 @@
+:root {
+    --deep-background: #131312;
+    --semi-background: #1f1f1f;
+    --font-color: #e1e1e1;
+    --purple: #c28ffe;
+}
 html {
-    background-color: lightblue;
+    background-color: var(--deep-background);
+    font-family: sans-serif;
+    color: var(--font-color)
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+#info p {
 }
 
 .title {
@@ -8,10 +24,12 @@ html {
     font-size: 1.6rem;
     padding: 12px;
     font-weight: 600;
+    color: var(--font-color);
     margin-bottom: 12px;
     font-family: sans-serif;
-    background: white;
+    background: var(--semi-background);
     border-radius: 12px;
+    border: solid var(--purple) 1px;
 
 }
 
@@ -20,16 +38,26 @@ html {
     gap: 12px;
 }
 
+#myDropdown {}
+
 #map {
+    background-color: var(--semi-background);
     height: 450px;
-    width: 1450px;
+    flex-grow: 1;
     border-radius: 12px;
+    border: solid var(--purple) 1px;
 
 } 
 
 #info {
-    background-color: white;
+    border: solid var(--purple) 1px;
+    min-width: 250px;
+    background-color: var(--semi-background);
     border-radius: 12px;
     padding: 12px;
 }
 
+
+.hide {
+    display: none;
+}

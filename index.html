@@ -24,16 +24,30 @@
     
 </head>
 <body>
-    <div class="title"> Assignment 4</div>
-    <div class="row1">
-        <div id="map"></div>
-        <div id="info">
-            <h1>Title</h1>
-            <p>Maybe put something here ... not sure yet</p>
-            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta expedita placeat nulla incidunt sunt obcaecati fugiat, natus laboriosam voluptas molestiae tempora, vel fugit ipsam temporibus, tenetur magni. In, sapiente error.</p>
+    <div class="container">
+        <div class="title"> Assignment 4</div>
+        <div class="row1">
+            <div id="map"></div>
+            <div id="info">
+                <h1>Click on a Country</h1>
+                <p>and the country info will appear here</p>
+            </div>
         </div>
     </div>
-    <canvas id="myChart"></canvas>
+
+    <div class="chart-container hide">
+        <br>
+        <select id="myDropdown">
+            <option value="GDP \n($ USD billions PPP)" selected>GDP ($ USD billions PPP)</option>
+            <option value="GDP per capita in $ (PPP)">GDP per capita in $ (PPP)</option>
+            <option value="health expenditure \n% of GDP">Health expenditure (% of GDP)</option>
+            <option value="health expenditure \nper person">Health expenditure (per person)</option>
+            <option value="unemployment (%)">Unemployment (%)</option>
+            <option value="Military Spending as % of GDP">Military Spending (% of GDP)</option>
+          </select>
+          <br>
+        <canvas id="myChart"></canvas>
+    </div>
     
 
 
