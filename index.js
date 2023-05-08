@@ -9,6 +9,7 @@ This function also adds the lat and long columns of every country
 let current_country = null;
 let current_metric = 0;
 let myChart = null;
+let root = null;
 
 const loadData = async() => {
     let df = await d3.csv('data.csv');
@@ -24,6 +25,8 @@ const loadData = async() => {
       }
       // add column name here as follows to convert to float
       row['population'] = parseFloat(row['population']);
+      row['GDP per capita in $ (PPP)'] = parseFloat(row['GDP per capita in $ (PPP)']);
+      row['unemployment (%)'] = parseFloat(row['unemployment (%)']);
       row['Military Spending as % of GDP'] = parseFloat(row['Military Spending as % of GDP']);
       row['health expenditure \nper person'] = parseInt(row['health expenditure \nper person']);
       row['health expenditure \n% of GDP'] = parseFloat(row['health expenditure \n% of GDP']);
@@ -51,7 +54,7 @@ const loadData = async() => {
 }
   
 // prints data array to console
-// loadData().then(df => { console.log(df) })
+loadData().then(df => { console.log(df) })
 
 
 // generates the leaflet map and plots all the points
@@ -76,17 +79,20 @@ const makeMap = async() => {
         shadowSize: [41, 41]
       });
       
-      // L.marker([51.5, -0.09], {icon: greenIcon}).addTo(map);
-
         var marker = L.marker([row["lat"], row["long"]], {icon: purpIcon}).addTo(map);
-
-
         // on the click of the marker do ... 
         marker.on("click", () => {
             current_country = row['indicator']
+            
             if (myChart) {
               myChart.destroy();
             }
+            if (root) {
+              root.dispose()
+              // jump2
+            }
+
+            createTreemap()
             const chartContainer = document.querySelector('.chart-container');
             if (chartContainer.classList.contains('hide')) {
               chartContainer.classList.remove('hide');
@@ -100,7 +106,6 @@ const makeMap = async() => {
         })
     });    
 }
-
 makeMap()
 
 
@@ -123,7 +128,7 @@ const makeChart = async () => {
       },
       options: {
         animation: {
-          duration: 0000,
+          duration: 8000,
           easing: 'easeInOutQuad'
         },
         scales: {
@@ -144,10 +149,53 @@ const makeChart = async () => {
 const dropdown = document.getElementById('myDropdown');
 dropdown.addEventListener('change', (event) => {
   myChart.destroy();
+  root.dispose()
+  // jump1
   current_metric = parseInt(event.target.value)
   makeChart()
+  createTreemap()
 });
 
 
+
+const createTreemap = async() => {
+  const dataa = await loadData();
+  const items = ['GDP \n($ USD billions PPP)', 'GDP per capita in $ (PPP)', 'health expenditure \n% of GDP', 'health expenditure \nper person', 'unemployment (%)','Military Spending as % of GDP']
+  root = am5.Root.new("chartdiv");
+  root.setThemes([am5themes_Dark.new(root)]);
+  var container = root.container.children.push(
+    am5.Container.new(root, {
+      width: am5.percent(100),
+      height: am5.percent(85),
+      layout: root.verticalLayout
+    })
+  );
+  var series = container.children.push(
+    am5hierarchy.Treemap.new(root, {
+      singleBranchOnly: false,
+      downDepth: 1,
+      upDepth: -1,
+      initialDepth: 2,
+      valueField: "value",
+      categoryField: "name",
+      childDataField: "children",
+      nodePaddingOuter: 0,
+      nodePaddingInner: 0,
+    })
+  );
+
+  series.rectangles.template.setAll({ strokeWidth: 1});
+  let child = dataa.map((row) => {
+    return {name: row['indicator'], value: row[items[current_metric]]}
+  })
+  var data = { name: "Root", children: child };
+  series.rectangles.template.adapters.add("fillOpacity", function(fill, target) {
+    if (target.dataItem.dataContext.name === current_country) { return 1 }
+    else { return 0.5 }
+  });
+  series.data.setAll([data]);
+  series.set("selectedDataItem", series.dataItems[0]);
+  series.appear(10000, 1000);
+}
 
 
