@@ -66,6 +66,15 @@ html {
     background-color: var(--semi-background)
 }
 
+.legend-area {
+    flex-grow: 0;
+    display: flex;
+    justify-content: center;
+    align-items:center;
+    width: 500px;
+    font-size: 0.8em;
+}
+
 .row.map {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

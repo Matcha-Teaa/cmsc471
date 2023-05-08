@@ -28,6 +28,16 @@ const loadData = async () => {
 }
 let leafletMaps = [];
 
+function formatValue(value) {
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(0) + "m";
+    } else if (value >= 1000) {
+      return (value / 1000).toFixed(0) + "k";
+    } else {
+      return value.toFixed(0);
+    }
+  }
+
 // Adds maps to page
 const updateMaps = async () => {
     const columns = Object.keys(myData[0]).filter(key => key.includes(metrics[current_metric]));
@@ -47,6 +57,39 @@ const updateMaps = async () => {
 
     colorScale = d3.scaleSequential(d3.interpolateBlues)
         .domain([0, 1]);
+
+    const legendContainer = d3.select(".legend").style("width", "100%").style("height", "30px");
+
+    legendContainer.html("")
+
+    const numStops = 8;
+    const stopWidth = legendContainer.node().getBoundingClientRect().width / numStops;
+
+    const stops = d3.range(numStops).map(i => ({
+        offset: i / (numStops - 1),
+        color: colorScale(i / (numStops - 1))
+    }));
+
+    const stopGroups = legendContainer.selectAll("g")
+        .data(stops)
+        .join("g")
+        .attr("transform", (d, i) => `translate(${i * stopWidth}, 0)`);
+
+    stopGroups.append("rect")
+        .attr("width", stopWidth)
+        .attr("height", "6px")
+        .attr("fill", d => d.color);
+
+    stopGroups.append("text")
+        .text(d => formatValue(linearScale.invert(d.offset)))
+        .attr("x", stopWidth / 2)
+        .attr("y", "50%")
+        .attr("dy", "0.8em")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "0.9em")
+        .attr("fill", "white")
+        .attr("font-weight", "400")
+
 
     // Select the container element for the maps
     const mapRow = d3.select(".row.map");
