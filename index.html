@@ -38,7 +38,7 @@
             </div>
             <div class="metric-area">
                 <div>Selected metric:</div>
-                <select>
+                <select id="myDropdown">
                     <option value="0" selected>GDP ($ USD billions PPP)</option>
                     <option value="1">GDP per capita in $ (PPP)</option>
                     <option value="2">Health expenditure (% of GDP)</option>
@@ -50,24 +50,9 @@
         </div>
     
         <div class="row map">
-            <div id="map"></div>
-            <div id="info">
-                <h1>Click on a Country</h1>
-                <p>and the country info will appear here</p>
-            </div>
         </div>
 
-        <div class="row chart">
-            <br>
-            <select id="myDropdown">
-                <option value="0" selected>GDP ($ USD billions PPP)</option>
-                <option value="1">GDP per capita in $ (PPP)</option>
-                <option value="2">Health expenditure (% of GDP)</option>
-                <option value="3">Health expenditure (per person)</option>
-                <option value="4">Unemployment (%)</option>
-                <option value="5">Military Spending (% of GDP)</option>
-            </select>
-            <br>
+        <div class="row chart hide">
             <canvas id="myChart"></canvas>
             <div id="chartdiv"></div>
         </div>
