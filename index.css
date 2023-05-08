@@ -15,12 +15,12 @@ html {
     margin: auto;
 }
 
-.chart-container {
-    max-width: 1200px;
-    margin: auto;
+.row {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    background: red;
+    padding: 16px;
     background-color: var(--semi-background);
-    /* padding: 12px; */
-    margin-top: 12px;
     border: solid var(--purple) 1px;
     border-radius: 12px;
 }
@@ -28,9 +28,7 @@ html {
 .heading {
     display: flex;
     justify-content: center;
-    padding: 16px;
     font-weight: 600;
-    color: var(--font-color);
     margin-bottom: 12px;
     font-family: sans-serif;
     background: var(--semi-background);
@@ -70,6 +68,8 @@ html {
 .row1 {
     display: flex;
     gap: 12px;
+    max-width: 1200px;
+    width: 1200px;
 }
 
 #map {

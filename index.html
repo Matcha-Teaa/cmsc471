@@ -30,7 +30,8 @@
 
 <body>
     <div class="container">
-        <div class="heading">
+
+        <div class="row heading">
             <div class="title-area">
                 <div class="title">Assignment 4</div>
                 <div class="names">Rakrish Dhakal, Daniel Matcha</div>
@@ -47,28 +48,29 @@
                 </select>
             </div>
         </div>
-        <div class="row1">
+    
+        <div class="row map">
             <div id="map"></div>
             <div id="info">
                 <h1>Click on a Country</h1>
                 <p>and the country info will appear here</p>
             </div>
         </div>
-    </div>
 
-    <div class="chart-container hide">
-        <br>
-        <select id="myDropdown">
-            <option value="0" selected>GDP ($ USD billions PPP)</option>
-            <option value="1">GDP per capita in $ (PPP)</option>
-            <option value="2">Health expenditure (% of GDP)</option>
-            <option value="3">Health expenditure (per person)</option>
-            <option value="4">Unemployment (%)</option>
-            <option value="5">Military Spending (% of GDP)</option>
-        </select>
-        <br>
-        <canvas id="myChart"></canvas>
-        <div id="chartdiv"></div>
+        <div class="row chart">
+            <br>
+            <select id="myDropdown">
+                <option value="0" selected>GDP ($ USD billions PPP)</option>
+                <option value="1">GDP per capita in $ (PPP)</option>
+                <option value="2">Health expenditure (% of GDP)</option>
+                <option value="3">Health expenditure (per person)</option>
+                <option value="4">Unemployment (%)</option>
+                <option value="5">Military Spending (% of GDP)</option>
+            </select>
+            <br>
+            <canvas id="myChart"></canvas>
+            <div id="chartdiv"></div>
+        </div>
     </div>
 
 
