@@ -18,67 +18,36 @@ let root = null;
 let myData = {};
 let countries = null;
 
+let linearScale;
+let colorScale;
+
 // loads data and countries geojson
 const loadData = async () => {
     myData = await d3.csv("./data-processed.csv");
     countries = await d3.json("./countries.json")
 }
-
-// generates the leaflet map and plots all the points
-// const makeMap = async () => {
-//     const titleSelect = document.querySelector('#info h1');
-//     const textSelect = document.querySelector('#info p');
-//     const data = await loadData()
-//     var map = L.map('map').setView([15.505, 18.09], 1);
-//     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//         maxZoom: 19,
-//         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-//     }).addTo(map);
-
-//     data.forEach((row) => {
-
-//         var purpIcon = new L.Icon({
-//             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-//             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-//             iconSize: [25, 41],
-//             iconAnchor: [12, 41],
-//             popupAnchor: [1, -34],
-//             shadowSize: [41, 41]
-//         });
-
-//         var marker = L.marker([row["lat"], row["long"]], { icon: purpIcon }).addTo(map);
-//         // on the click of the marker do ... 
-//         marker.on("click", () => {
-//             current_country = row['indicator']
-
-//             if (myChart) {
-//                 myChart.destroy();
-//             }
-//             if (root) {
-//                 root.dispose()
-//                 // jump2
-//             }
-
-//             // createTreemap()
-//             const chartRow = document.querySelector('.row.chart');
-//             if (chartRow.classList.contains('hide')) {
-//                 chartRow.classList.remove('hide');
-//             }
-//             titleSelect.textContent = `${row["indicator"]}`
-//             textSelect.innerHTML = `<b>ISO Country code: </b>${row["ISO Country code"]}<br><b>population: </b>${row["population"]}<br><b>GDP ($ USD billions PPP): </b>${row["GDP \n($ USD billions PPP)"]}<br><b>GDP per capita in $ (PPP): </b>${row["GDP per capita in $ (PPP)"]}<br><b>health expenditure % of GDP: </b>${row["health expenditure \n% of GDP"]}<br><b>health expenditure per person: </b>${row["health expenditure \nper person"]}<br><b>unemployment (%): </b>${row["unemployment (%)"]}<br><b>Military Spending as % of GDP: </b>${row["Military Spending as % of GDP"]}`;
-//             makeChart("GDP \n($ USD billions PPP)")
-//             var popupContent = `Name: ${row["indicator"]}<br>Lat: ${row["lat"]}<br>Long: ${row["long"]}`;
-//             var popup = L.popup().setLatLng(marker.getLatLng()).setContent(popupContent);
-//             popup.openOn(map);
-//         })
-//     });
-// }
-// makeMap()
-
 let leafletMaps = [];
 
 // Adds maps to page
 const updateMaps = async () => {
+    const columns = Object.keys(myData[0]).filter(key => key.includes(metrics[current_metric]));
+
+    let maxValue = -Infinity;
+    let minValue = Infinity;
+
+    columns.forEach(col => {
+        maxValue = Math.max(maxValue, Math.max(...myData.map(d => d[col])));
+        minValue = Math.min(minValue, Math.min(...myData.map(d => d[col])));
+    });
+
+    linearScale = d3
+        .scaleLinear()
+        .domain([minValue, maxValue])
+        .range([0, 1]);
+
+    colorScale = d3.scaleSequential(d3.interpolateBlues)
+        .domain([0, 1]);
+
     // Select the container element for the maps
     const mapRow = d3.select(".row.map");
 
@@ -100,11 +69,25 @@ const updateMaps = async () => {
         .append("div")
         .attr("id", "map")
         .each(function (d) {
-            const map = L.map(this).setView([51.505, -0.09], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-                maxZoom: 18,
-            }).addTo(map);
+            const map = L.map(this).setView([50, 0], 1);
+
+            function style(feature) {
+                const match = myData.find(d => d["country"] == feature.properties.adm0_iso);
+
+                const value = match ? match[metrics[current_metric] + ` (${d})`] : null;
+                
+                // console.log(feature.properties.adm0_iso + ", " + value);
+
+                return {
+                    fillColor: value ? colorScale(linearScale(value)) : 'transparent',
+                    weight: 1,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7
+                };
+            }
+            
+            L.geoJson(countries, {style: style}).addTo(map);
             leafletMaps.push(map);
         })
 

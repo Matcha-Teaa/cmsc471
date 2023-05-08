@@ -1,6 +1,7 @@
 :root {
     --deep-background: #131312;
     --semi-background: #1f1f1f;
+    --light-background: #444444;
     --font-color: #e1e1e1;
     --purple: #c28ffe;
 }
@@ -75,8 +76,8 @@ html {
 }
 
 #map {
-    background-color: var(--semi-background);
-    height: 450px;
+    background-color: var(--light-background);
+    height: 400px;
     /* flex-grow: 1; */
     border-radius: 12px;
     border: solid var(--purple) 1px;
