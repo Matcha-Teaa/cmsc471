@@ -25,11 +25,10 @@ html {
     border-radius: 12px;
 }
 
-.title {
+.heading {
     display: flex;
     justify-content: center;
-    font-size: 1.6rem;
-    padding: 12px;
+    padding: 16px;
     font-weight: 600;
     color: var(--font-color);
     margin-bottom: 12px;
@@ -37,7 +36,35 @@ html {
     background: var(--semi-background);
     border-radius: 12px;
     border: solid var(--purple) 1px;
+}
 
+.title-area {
+    flex-grow: 0;
+}
+
+.title {
+    font-size: 1.6em;
+    margin-bottom: 0.2em;
+}
+
+.metric-area {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    gap: 10px;
+}
+
+.metric-area select {
+    font: inherit;
+    color: inherit;
+    border: 1px solid #fff;
+    background-color: transparent;
+}
+
+.metric-area select option {
+    background-color: var(--semi-background)
 }
 
 .row1 {

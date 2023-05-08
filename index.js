@@ -92,7 +92,7 @@ const makeMap = async () => {
                 // jump2
             }
 
-            createTreemap()
+            // createTreemap()
             const chartContainer = document.querySelector('.chart-container');
             if (chartContainer.classList.contains('hide')) {
                 chartContainer.classList.remove('hide');
@@ -153,7 +153,7 @@ dropdown.addEventListener('change', (event) => {
     // jump1
     current_metric = parseInt(event.target.value)
     makeChart()
-    createTreemap()
+    // createTreemap()
 });
 
 
