@@ -30,13 +30,13 @@ let leafletMaps = [];
 
 function formatValue(value) {
     if (value >= 1000000) {
-      return (value / 1000000).toFixed(0) + "m";
+        return (value / 1000000).toFixed(0) + "m";
     } else if (value >= 1000) {
-      return (value / 1000).toFixed(0) + "k";
+        return (value / 1000).toFixed(0) + "k";
     } else {
-      return value.toFixed(0);
+        return value.toFixed(0);
     }
-  }
+}
 
 // Adds maps to page
 const updateMaps = async () => {
@@ -118,7 +118,7 @@ const updateMaps = async () => {
                 const match = myData.find(d => d["country"] == feature.properties.adm0_iso);
 
                 const value = match ? match[metrics[current_metric] + ` (${d})`] : null;
-                
+
                 // console.log(feature.properties.adm0_iso + ", " + value);
 
                 return {
@@ -129,8 +129,24 @@ const updateMaps = async () => {
                     fillOpacity: 0.7
                 };
             }
-            
-            L.geoJson(countries, {style: style}).addTo(map);
+
+            L.geoJson(countries, {
+                style: style, onEachFeature: function (feature, layer) {
+                    console.log(feature)
+                    const match = myData.find(d => d["country"] == feature.properties.adm0_iso);
+
+                    const value = match ? match[metrics[current_metric] + ` (${d})`] : null;
+                    // Create a tooltip with the feature's name
+                    const tooltipContent = "<em>Country:</em> " + feature.properties.name + "<br><em>" + metrics[current_metric] + ` (${d})` + ":</em> " + value;
+                    const tooltipOptions = {
+                        sticky: true // Make the tooltip stay open on hover
+                    };
+                    const tooltip = L.tooltip(tooltipOptions).setContent(tooltipContent);
+
+                    // Bind the tooltip to the feature's layer
+                    layer.bindTooltip(tooltip);
+                }
+            }).addTo(map);
             leafletMaps.push(map);
         })
 
