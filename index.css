@@ -11,7 +11,7 @@ html {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: auto;
 }
 
@@ -65,20 +65,22 @@ html {
     background-color: var(--semi-background)
 }
 
-.row1 {
-    display: flex;
+.row.map {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 12px;
-    max-width: 1200px;
-    width: 1200px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
 }
 
 #map {
     background-color: var(--semi-background);
     height: 450px;
-    flex-grow: 1;
+    /* flex-grow: 1; */
     border-radius: 12px;
     border: solid var(--purple) 1px;
-
+    margin-top: 6px;
 } 
 
 #info {
