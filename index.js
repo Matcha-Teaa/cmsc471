@@ -22,10 +22,11 @@ function formatValue(value) {
 }
 
 // Global variables
-let current_country = null;
+let current_country = "AFG";
 let current_metric = 0;
 let current_year = 2018;
 let myChart = null;
+let myChart2 = null;
 let root = null;
 
 // myData contains the preprocessed data
@@ -44,7 +45,7 @@ let colorScale;
 // Loads CSV data and countries geojson
 const loadData = async () => {
     myData = await d3.csv("./data-processed.csv");
-    countries = await d3.json("./countries.json")
+    countries = await d3.json("./countries.json");
 }
 
 // Updates legend and maps
@@ -192,7 +193,9 @@ const updateMapsAndLegend = async () => {
                         current_country = feature.properties.adm0_iso;
                         console.log(current_country);
                         myChart.destroy();
+                        myChart2.destroy();
                         makeChart();
+                        makeChart2();
                     });
                 }
             }).addTo(map);
@@ -240,6 +243,43 @@ const makeChart = async () => {
         console.log(error.message);
     }
 };
+
+const makeChart2 = async() => {
+    try {
+        const ctx = document.getElementById('myChart2');
+
+        console.log(myData.find(d => d.country == current_country)[METRICS[current_metric] + ` (${current_year})`])
+
+        myChart2 = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: METRICS_YEARS[METRICS[current_metric]],
+                datasets: [{
+                    label: METRICS[current_metric],
+                    data: myData.find(d => d.country == current_country)[METRICS[current_metric] + ` (${current_year})`],
+                    borderWidth: 1,
+                    fill: false,
+                    borderColor: '#c28ffe',
+                    // backgroundColor: myData.map(row => row["country"] === current_country ? 'green' : '#c28ffe')
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 100,
+                    easing: 'easeInOutQuad'
+                },
+                scales: {
+                    y: {
+                        type: "logarithmic",
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
+}
 
 // creates the tree map
 const createTreemap = async () => {
@@ -293,17 +333,27 @@ dropdown.addEventListener('change', event => {
     current_metric = parseInt(event.target.value);
     updateMapsAndLegend();
     myChart.destroy();
-    makeChart()
+    myChart2.destroy();
+    makeChart();
+    makeChart2();
     // createTreemap()
 });
 
 // on change of second dropdown
 const dropdown2 = document.getElementById('myDropdown2');
 dropdown2.addEventListener('change', event => {
-    console.log(event.target.value);
     current_year = parseInt(event.target.value);
     myChart.destroy();
     makeChart();
+})
+
+const dropdown3 = document.getElementById('myDropdown3');
+dropdown3.addEventListener('change', event => {
+    current_country = event.target.value;
+    myChart.destroy();
+    makeChart();
+    myChart2.destroy();
+    makeChart2();
 })
 
 // initial call
@@ -311,5 +361,6 @@ loadData().then(() => {
     // console.log(data);
     updateMapsAndLegend();
     makeChart();
+    makeChart2();
     // createTreemap();
 });
