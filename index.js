@@ -1,5 +1,6 @@
 // Constants
-const years = {
+// Corresponds to the field names in myData
+const METRICS_YEARS = {
     'GDP \n($ USD billions PPP)': [2018, 2019, 2020, 2021],
     'GDP per capita in $ (PPP)': [2018, 2019, 2020, 2021],
     'health expenditure \n% of GDP': [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
@@ -7,27 +8,9 @@ const years = {
     'unemployment (%)': [2018, 2021],
     'Military Spending as % of GDP': [2019, 2021]
 }
-const metrics = Object.keys(years);
+const METRICS = Object.keys(METRICS_YEARS);
 
-// Global variables
-let current_country = null;
-let current_metric = 0;
-let myChart = null;
-let root = null;
-
-let myData = {};
-let countries = null;
-
-let linearScale;
-let colorScale;
-
-// loads data and countries geojson
-const loadData = async () => {
-    myData = await d3.csv("./data-processed.csv");
-    countries = await d3.json("./countries.json")
-}
-let leafletMaps = [];
-
+// Utility functions
 function formatValue(value) {
     if (value >= 1000000) {
         return (value / 1000000).toFixed(0) + "m";
@@ -38,9 +21,40 @@ function formatValue(value) {
     }
 }
 
-// Adds maps to page
-const updateMaps = async () => {
-    const columns = Object.keys(myData[0]).filter(key => key.includes(metrics[current_metric]));
+// Global variables
+let current_country = null;
+let current_metric = 0;
+let current_year = 2018;
+let myChart = null;
+let root = null;
+
+// myData contains the preprocessed data
+let myData = {};
+
+// countries contains geojson of country boundaries
+let countries = null;
+
+// We can find the data for each country by searching for
+// the matching ISO code in myData
+
+// d3 color scale
+let linearScale;
+let colorScale;
+
+// Loads CSV data and countries geojson
+const loadData = async () => {
+    myData = await d3.csv("./data-processed.csv");
+    countries = await d3.json("./countries.json")
+}
+
+// Updates legend and maps
+let leafletMaps = [];
+
+// This function is called when dropdown value is changed
+// Deletes existing legend and maps, and creates new legend and maps based on dropdown value
+const updateMapsAndLegend = async () => {
+    // Determines minimum and maximum values of current metric across all the years
+    const columns = Object.keys(myData[0]).filter(key => key.includes(METRICS[current_metric]));
 
     let maxValue = -Infinity;
     let minValue = Infinity;
@@ -50,6 +64,9 @@ const updateMaps = async () => {
         minValue = Math.min(minValue, Math.min(...myData.map(d => d[col])));
     });
 
+    // D3 color scale
+    // First converts value to be in range [0, 1]
+    // Then converts the normalized value to a color
     linearScale = d3
         .scaleLinear()
         .domain([minValue, maxValue])
@@ -58,9 +75,9 @@ const updateMaps = async () => {
     colorScale = d3.scaleSequential(d3.interpolateBlues)
         .domain([0, 1]);
 
+    // D3 code to create the legend
     const legendContainer = d3.select(".legend").style("width", "100%").style("height", "30px");
-
-    legendContainer.html("")
+    legendContainer.html("")    // remove the current legend
 
     const numStops = 8;
     const stopWidth = legendContainer.node().getBoundingClientRect().width / numStops;
@@ -90,36 +107,62 @@ const updateMaps = async () => {
         .attr("fill", "white")
         .attr("font-weight", "400")
 
+    // D3 code to create dropdown2
+    
+    const select = d3.select("#myDropdown2");
 
-    // Select the container element for the maps
+    select.html("");
+    
+    // Get all the years that apply to the current metric
+    const years = METRICS_YEARS[METRICS[current_metric]];
+    
+    const options = select.selectAll("#option")
+        .data(years, d => (d, current_metric));
+    
+    options.enter()
+        .append("option")
+        .attr("value", d => d)
+        .text(d => d)
+
+    // D3 code to create dropdown3
+
+    const select3 = d3.select("#myDropdown3");
+
+    select3.html("");
+    
+    const options3 = select3.selectAll("#option")
+        .data(countries.features.sort((a, b) => d3.ascending(a.properties.name, b.properties.name)));
+    
+    options3.enter()
+        .append("option")
+        .attr("value", d => d.properties.adm0_iso)
+        .text(d => d.properties.name)
+
+    // Update the maps
     const mapRow = d3.select(".row.map");
 
     // Remove all existing elements
     mapRow.html("");
     leafletMaps = [];
 
-    // Get the data for the current metric and years
-    const data = years[metrics[current_metric]];
-
-    // Bind the data to the existing map elements
+    // Bind the years to the existing map elements (create a map for each year)
     const maps = mapRow.selectAll("#map")
-        .data(data, d => (d, current_metric));
+        .data(years, d => (d, current_metric));
 
-    // Add new map elements for new data items
+    // Add new map elements for each year
     maps.enter()
         .append("div")
-        .text(d => d.toString())
+        .text(d => d.toString())        // Add year above map
         .append("div")
         .attr("id", "map")
         .each(function (d) {
             const map = L.map(this).setView([50, 0], 1);
 
+            // Uses value of current metric, and current year, to style the country
             function style(feature) {
+                // Find this country in myData
                 const match = myData.find(d => d["country"] == feature.properties.adm0_iso);
-
-                const value = match ? match[metrics[current_metric] + ` (${d})`] : null;
-
-                // console.log(feature.properties.adm0_iso + ", " + value);
+                const value = match ? match[METRICS[current_metric] + ` (${d})`] : null;
 
                 return {
                     fillColor: value ? colorScale(linearScale(value)) : 'transparent',
@@ -132,12 +175,11 @@ const updateMaps = async () => {
 
             L.geoJson(countries, {
                 style: style, onEachFeature: function (feature, layer) {
-                    console.log(feature)
                     const match = myData.find(d => d["country"] == feature.properties.adm0_iso);
 
-                    const value = match ? match[metrics[current_metric] + ` (${d})`] : null;
+                    const value = match ? match[METRICS[current_metric] + ` (${d})`] : null;
                     // Create a tooltip with the feature's name
-                    const tooltipContent = "<em>Country:</em> " + feature.properties.name + "<br><em>" + metrics[current_metric] + ` (${d})` + ":</em> " + value;
+                    const tooltipContent = "<em>Country:</em> " + feature.properties.name + "<br><em>" + METRICS[current_metric] + ` (${d})` + ":</em> " + value;
                     const tooltipOptions = {
                         sticky: true // Make the tooltip stay open on hover
                     };
@@ -145,6 +187,13 @@ const updateMaps = async () => {
 
                     // Bind the tooltip to the feature's layer
                     layer.bindTooltip(tooltip);
+
+                    layer.on('click', function() {
+                        current_country = feature.properties.adm0_iso;
+                        console.log(current_country);
+                        myChart.destroy();
+                        makeChart();
+                    });
                 }
             }).addTo(map);
             leafletMaps.push(map);
@@ -160,22 +209,23 @@ const updateMaps = async () => {
 // creates the bar chart
 const makeChart = async () => {
     try {
-        const dataa = await loadData();
         const ctx = document.getElementById('myChart');
+        console.log(myData);
+
         myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: dataa.map(row => row.indicator),
+                labels: myData.map(row => row["country"]),
                 datasets: [{
-                    label: '# of Votes',
-                    data: dataa.map(row => row[items[current_metric]]),
+                    label: METRICS[current_metric],
+                    data: myData.map(row => row[METRICS[current_metric] + ` (${current_year})`]),
                     borderWidth: 0,
-                    backgroundColor: dataa.map(row => row.indicator === current_country ? 'green' : '#c28ffe')
+                    backgroundColor: myData.map(row => row["country"] === current_country ? 'green' : '#c28ffe')
                 }]
             },
             options: {
                 animation: {
-                    duration: 8000,
+                    duration: 0,
                     easing: 'easeInOutQuad'
                 },
                 scales: {
@@ -193,9 +243,10 @@ const makeChart = async () => {
 
 // creates the tree map
 const createTreemap = async () => {
-    const dataa = await loadData();
-    const items = ['GDP \n($ USD billions PPP)', 'GDP per capita in $ (PPP)', 'health expenditure \n% of GDP', 'health expenditure \nper person', 'unemployment (%)', 'Military Spending as % of GDP']
     root = am5.Root.new("chartdiv");
+
+    console.log(root);
+
     root.setThemes([am5themes_Dark.new(root)]);
     var container = root.container.children.push(
         am5.Container.new(root, {
@@ -219,8 +270,8 @@ const createTreemap = async () => {
     );
 
     series.rectangles.template.setAll({ strokeWidth: 1 });
-    let child = dataa.map((row) => {
-        return { name: row['indicator'], value: row[items[current_metric]] }
+    let child = myData.map((row) => {
+        return { name: row['country'], value: row[METRICS[current_metric]] }
     })
     var data = { name: "Root", children: child };
     series.rectangles.template.adapters.add("fillOpacity", function (fill, target) {
@@ -240,13 +291,25 @@ dropdown.addEventListener('change', event => {
     // root.dispose()
     // // jump1
     current_metric = parseInt(event.target.value);
-    updateMaps();
-    // makeChart()
-    // // createTreemap()
+    updateMapsAndLegend();
+    myChart.destroy();
+    makeChart()
+    // createTreemap()
 });
+
+// on change of second dropdown
+const dropdown2 = document.getElementById('myDropdown2');
+dropdown2.addEventListener('change', event => {
+    console.log(event.target.value);
+    current_year = parseInt(event.target.value);
+    myChart.destroy();
+    makeChart();
+})
 
 // initial call
 loadData().then(() => {
     // console.log(data);
-    updateMaps();
+    updateMapsAndLegend();
+    makeChart();
+    // createTreemap();
 });
