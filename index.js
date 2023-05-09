@@ -213,7 +213,7 @@ const updateMapsAndLegend = async () => {
 const makeChart = async () => {
     try {
         const ctx = document.getElementById('myChart');
-        console.log(myData);
+        // console.log(myData);
 
         myChart = new Chart(ctx, {
             type: 'bar',
@@ -237,7 +237,7 @@ const makeChart = async () => {
                         beginAtZero: true
                     }
                 }
-            }
+            },
         });
     } catch (error) {
         console.log(error.message);
@@ -245,10 +245,20 @@ const makeChart = async () => {
 };
 
 const makeChart2 = async() => {
+    if (dropdown3 != null) {
+        if (dropdown3.value !== current_country) {
+            dropdown3.value = current_country;
+        }
+    }
     try {
         const ctx = document.getElementById('myChart2');
 
-        console.log(myData.find(d => d.country == current_country)[METRICS[current_metric] + ` (${current_year})`])
+        console.log(current_country);
+        console.log(myData.find(d => d.country === current_country));
+
+        console.log(myData.find(d => d.country === current_country)[METRICS[current_metric] + ` (${current_year})`]);
+
+        const years = METRICS_YEARS[METRICS[current_metric]];
 
         myChart2 = new Chart(ctx, {
             type: 'line',
@@ -256,7 +266,7 @@ const makeChart2 = async() => {
                 labels: METRICS_YEARS[METRICS[current_metric]],
                 datasets: [{
                     label: METRICS[current_metric],
-                    data: myData.find(d => d.country == current_country)[METRICS[current_metric] + ` (${current_year})`],
+                    data: years.map(y => myData.find(d => d.country == current_country)[METRICS[current_metric] + ` (${y})`]),
                     borderWidth: 1,
                     fill: false,
                     borderColor: '#c28ffe',
@@ -268,12 +278,6 @@ const makeChart2 = async() => {
                     duration: 100,
                     easing: 'easeInOutQuad'
                 },
-                scales: {
-                    y: {
-                        type: "logarithmic",
-                        beginAtZero: true
-                    }
-                }
             }
         });
     } catch (error) {
